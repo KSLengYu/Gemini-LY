@@ -14,8 +14,9 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # --- 配置区域 ---
 # 在 Vercel 部署时，请在后台 Environment Variables 设置这些值
 # 本地测试可以直接把值填在 default='' 引号里，但不要提交给别人看
-SUPABASE_URL = os.getenv('SUPABASE_URL', '你的_SUPABASE_URL')
-SUPABASE_KEY = os.getenv('SUPABASE_KEY', '你的_SUPABASE_SERVICE_ROLE_KEY')
+# api/index.py (修改这两行)
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").strip()
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "").strip()
 SECRET_KEY = os.getenv('FLASK_SECRET_KEY', 'random_string_for_session')
 
 # SMTP 账号配置：格式为 JSON 字符串
