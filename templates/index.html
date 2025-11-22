@@ -1,1 +1,607 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星际漫游指南 | Star Log</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #05050a;
+            --card-bg: rgba(16, 20, 30, 0.7);
+            --neon-blue: #00f3ff;
+            --neon-purple: #bc13fe;
+            --neon-red: #ff0055;
+            --text-main: #e0e0e0;
+            --text-dim: #8899a6;
+            --border-color: rgba(0, 243, 255, 0.3);
+        }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Share Tech Mono', monospace; /* 科幻等宽字体 */
+            overflow-x: hidden;
+            min-height: 100vh;
+            background-image: 
+                linear-gradient(rgba(0, 20, 30, 0.8), rgba(0, 10, 10, 0.9)),
+                url('https://images.unsplash.com/photo-1506318137071-a8bcbf67cc77?q=80&w=2000&auto=format&fit=crop');
+            background-attachment: fixed;
+            background-size: cover;
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 4px; }
+
+        /* --- 布局 --- */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 30px;
+            animation: slideUpFade 1s ease-out;
+        }
+
+        @media (max-width: 800px) {
+            .container { grid-template-columns: 1fr; }
+            .sidebar { display: none; } /* 移动端隐藏侧边栏 */
+        }
+
+        /* --- 动画 --- */
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 5px var(--neon-blue); }
+            50% { box-shadow: 0 0 15px var(--neon-blue), 0 0 5px var(--neon-purple); }
+            100% { box-shadow: 0 0 5px var(--neon-blue); }
+        }
+
+        /* --- 侧边栏 --- */
+        .sidebar {
+            position: sticky;
+            top: 20px;
+            height: fit-content;
+        }
+        .panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 243, 255, 0.1);
+        }
+        .panel-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-blue);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        /* --- 更新日志 --- */
+        .log-item { margin-bottom: 10px; font-size: 0.9em; }
+        .log-date { color: var(--neon-purple); font-weight: bold; }
+
+        /* --- 主区域 --- */
+        .main-content { display: flex; flex-direction: column; gap: 20px; }
+
+        /* 输入框区域 */
+        .input-area {
+            background: var(--card-bg);
+            border: 1px solid var(--neon-blue);
+            padding: 20px;
+            border-radius: 8px;
+            position: relative;
+        }
+        .input-area textarea {
+            width: 100%;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            padding: 15px;
+            font-family: inherit;
+            resize: vertical;
+            min-height: 80px;
+            border-radius: 4px;
+            outline: none;
+            transition: 0.3s;
+        }
+        .input-area textarea:focus {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 10px rgba(188, 19, 254, 0.3);
+        }
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+        .btn {
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            padding: 8px 20px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            transition: 0.3s;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            border-radius: 2px;
+        }
+        .btn:hover {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+        .btn-danger { border-color: var(--neon-red); color: var(--neon-red); background: rgba(255,0,85,0.1); }
+        .btn-danger:hover { background: var(--neon-red); color: #fff; box-shadow: 0 0 15px var(--neon-red); }
+
+        /* --- 留言列表 --- */
+        .message-card {
+            background: linear-gradient(135deg, rgba(16,20,30,0.9), rgba(5,5,10,0.9));
+            border-left: 3px solid var(--border-color);
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 15px;
+            position: relative;
+            transition: 0.3s;
+        }
+        .message-card:hover { border-left-color: var(--neon-purple); }
+        
+        .msg-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--neon-blue); object-fit: cover; }
+        .username { font-weight: bold; color: #fff; font-size: 1.1em; display: flex; align-items: center; gap: 5px; }
+        
+        /* 蓝勾认证图标 */
+        .verified-icon { width: 16px; height: 16px; fill: #1d9bf0; }
+
+        .meta-info { font-size: 0.8em; color: var(--text-dim); display: flex; gap: 10px; flex-wrap: wrap; }
+        .device-tag { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.75em; }
+        .location-tag { color: var(--neon-blue); }
+
+        .msg-content { margin: 15px 0; line-height: 1.6; word-break: break-all; }
+        .msg-footer { display: flex; gap: 15px; font-size: 0.9em; }
+        .action-link { color: var(--text-dim); cursor: pointer; text-decoration: none; transition: 0.2s; }
+        .action-link:hover { color: var(--neon-blue); }
+
+        /* 引用/回复样式 */
+        .reply-quote {
+            border-left: 2px solid var(--neon-purple);
+            background: rgba(188, 19, 254, 0.1);
+            padding: 8px;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            color: #ccc;
+        }
+
+        /* --- 模态框 --- */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: #111;
+            border: 1px solid var(--neon-blue);
+            padding: 30px;
+            width: 400px;
+            max-width: 90%;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.2);
+        }
+        .close-btn { position: absolute; top: 10px; right: 15px; cursor: pointer; color: #fff; font-size: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; color: var(--neon-blue); font-size: 0.9em; }
+        .form-group input {
+            width: 100%; padding: 10px; background: #222; border: 1px solid #444; color: #fff;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .code-row { display: flex; gap: 10px; }
+
+        /* 折叠功能 */
+        .collapsed .msg-content {
+            max-height: 60px;
+            overflow: hidden;
+            mask-image: linear-gradient(180deg, #fff 60%, transparent);
+        }
+        .toggle-btn { font-size: 0.8em; color: var(--neon-purple); cursor: pointer; display: none; }
+        
+        /* 游客提示 */
+        .guest-limit { color: var(--neon-red); font-size: 0.8em; margin-top: 5px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="sidebar">
+        <div class="panel">
+            <div class="panel-title">SYSTEM STATUS</div>
+            <div id="user-status">
+                <p>状态: <span style="color: #888">未连接</span></p>
+                <button class="btn" style="width:100%; margin-top:10px;" onclick="openModal('loginModal')">接入系统 (Login)</button>
+                <button class="btn" style="width:100%; margin-top:10px;" onclick="openModal('registerModal')">注册 ID</button>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title">UPDATE LOG</div>
+            <div class="log-item">
+                <span class="log-date">2025.11.21</span><br>
+                系统核心重构，接入 Supabase 数据库。
+            </div>
+            <div class="log-item">
+                <span class="log-date">2025.11.20</span><br>
+                新增量子纠缠通讯 (SMTP) 模块，支持多节点随机路由。
+            </div>
+            <div class="log-item">
+                <span class="log-date">2025.11.18</span><br>
+                增加生物识别 (QQ头像) 和 坐标追踪 (IP定位)。
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="panel input-area">
+            <div id="reply-indicator" style="display:none; color: var(--neon-purple); margin-bottom: 5px; font-size: 0.9em;">
+                正在回复: <span id="reply-target-name">...</span> <span style="cursor:pointer; color:#fff" onclick="cancelReply()">[x]</span>
+            </div>
+            <textarea id="messageInput" placeholder="输入你的星际广播... (游客每日限5条)"></textarea>
+            <div class="actions">
+                <span id="charCount" style="color: #555; font-size: 0.8em;">0 / 500</span>
+                <button class="btn" onclick="sendMessage()">发送信号</button>
+            </div>
+        </div>
+
+        <div id="message-list">
+            <div style="text-align:center; color: #555; margin-top: 50px;">正在搜索信号频段...</div>
+        </div>
+    </div>
+</div>
+
+<div id="loginModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('loginModal')">&times;</span>
+        <h2 class="panel-title">身份验证</h2>
+        <div class="form-group"><label>邮箱</label><input type="email" id="loginEmail"></div>
+        <div class="form-group"><label>密码</label><input type="password" id="loginPwd"></div>
+        <button class="btn" style="width:100%" onclick="doLogin()">确认连接</button>
+    </div>
+</div>
+
+<div id="registerModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('registerModal')">&times;</span>
+        <h2 class="panel-title">新用户登记</h2>
+        <div class="form-group"><label>邮箱</label>
+            <div class="code-row">
+                <input type="email" id="regEmail">
+                <button class="btn" style="width:100px;" onclick="sendCode()" id="codeBtn">获取验证码</button>
+            </div>
+        </div>
+        <div class="form-group"><label>验证码</label><input type="text" id="regCode"></div>
+        <div class="form-group"><label>密码</label><input type="password" id="regPwd"></div>
+        <div class="form-group"><label>昵称</label><input type="text" id="regName"></div>
+        <div class="form-group"><label>绑定QQ (自动获取头像)</label><input type="text" id="regQQ"></div>
+        <button class="btn" style="width:100%" onclick="doRegister()">注册</button>
+    </div>
+</div>
+
+<div id="profileModal" class="modal">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeModal('profileModal')">&times;</span>
+        <h2 class="panel-title">档案管理</h2>
+        <div class="form-group">
+            <label>绑定/解绑 QQ</label>
+            <input type="text" id="profileQQ" placeholder="输入新QQ号">
+        </div>
+        <button class="btn" onclick="updateProfile('bind_qq')">更新绑定</button>
+        <hr style="border: 0; border-top: 1px solid #333; margin: 20px 0;">
+        <div class="form-group">
+            <label>修改密码</label>
+            <input type="password" id="profilePwd" placeholder="新密码">
+        </div>
+        <button class="btn" onclick="updateProfile('change_pwd')">重置密码</button>
+    </div>
+</div>
+
+<script>
+    // --- 全局状态 ---
+    let currentUser = null;
+    let replyToId = null;
+
+    // --- 蓝勾图标 SVG ---
+    const verifiedIcon = `
+        <svg class="verified-icon" viewBox="0 0 24 24">
+            <g><path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .495.083.965.238 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5c-.145.217-.382.334-.625.334-.143 0-.288-.04-.416-.126l-.115-.094-2.415-2.415c-.293-.293-.293-.768 0-1.06s.768-.294 1.06 0l1.77 1.767 3.825-5.74c.23-.345.696-.436 1.04-.207.346.23.44.696.21 1.04z"></path></g>
+        </svg>
+    `;
+
+    // --- 初始化 ---
+    document.addEventListener('DOMContentLoaded', () => {
+        checkLogin();
+        loadMessages();
+    });
+
+    // --- 核心逻辑 ---
+
+    async function loadMessages() {
+        const res = await fetch('/api/messages');
+        const msgs = await res.json();
+        const container = document.getElementById('message-list');
+        container.innerHTML = '';
+
+        if(msgs.length === 0) {
+            container.innerHTML = '<div style="text-align:center; color:#555">暂无通信记录</div>';
+            return;
+        }
+
+        // 构建 Map 方便查找父消息
+        const msgMap = {};
+        msgs.forEach(m => msgMap[m.id] = m);
+
+        msgs.forEach(msg => {
+            // 确定头像
+            let avatarSrc = msg.app_users?.avatar_url || 'https://api.dicebear.com/7.x/bottts/svg?seed=' + msg.id;
+            // 确定名字
+            let name = msg.app_users?.nickname || '神秘游客';
+            if (msg.is_guest) name += ' (Guest)';
+            // 蓝勾逻辑
+            let verified = '';
+            if (msg.app_users && (msg.app_users.role === 'admin' || msg.app_users.role === 'super_admin')) {
+                verified = verifiedIcon;
+            }
+            // 父消息内容
+            let quoteHtml = '';
+            if (msg.parent_id && msgMap[msg.parent_id]) {
+                const p = msgMap[msg.parent_id];
+                const pName = p.app_users?.nickname || 'Unknown';
+                // 截取部分内容
+                let pContent = p.content.length > 30 ? p.content.substring(0,30) + '...' : p.content;
+                if(p.is_deleted) pContent = "已撤回";
+                quoteHtml = `<div class="reply-quote">回复 @${pName}: ${pContent}</div>`;
+            }
+
+            // 渲染
+            const div = document.createElement('div');
+            div.className = 'message-card';
+            if(msg.content.length > 200) div.classList.add('collapsed');
+            
+            const dateStr = new Date(msg.created_at).toLocaleString();
+
+            // 删除按钮逻辑
+            let deleteBtn = '';
+            if (currentUser) {
+                const isMyMsg = currentUser.id === msg.user_id;
+                const isAdmin = ['admin', 'super_admin'].includes(currentUser.role);
+                if (isMyMsg || isAdmin) {
+                    deleteBtn = `<span class="action-link" onclick="deleteMsg('${msg.id}')" style="color:var(--neon-red)">[删除/撤回]</span>`;
+                }
+            }
+
+            div.innerHTML = `
+                <div class="msg-header">
+                    <img src="${avatarSrc}" class="avatar">
+                    <div style="flex:1">
+                        <div class="username">${name} ${verified}</div>
+                        <div class="meta-info">
+                            <span>${dateStr}</span>
+                            <span class="location-tag">${msg.location_info || '未知'}</span>
+                            <span class="device-tag">${msg.device_model || 'Terminal'}</span>
+                        </div>
+                    </div>
+                </div>
+                ${quoteHtml}
+                <div class="msg-content">${escapeHtml(msg.content)}</div>
+                <div class="toggle-btn" onclick="this.parentElement.classList.toggle('collapsed')">展开/收起</div>
+                <div class="msg-footer">
+                    <span class="action-link" onclick="setReply('${msg.id}', '${name}')">回复</span>
+                    ${deleteBtn}
+                </div>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    async function sendMessage() {
+        const content = document.getElementById('messageInput').value;
+        if(!content.trim()) return alert("信号内容为空");
+
+        const btn = document.querySelector('.input-area .btn');
+        btn.innerText = "发送中...";
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/messages', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    content: content,
+                    parent_id: replyToId
+                })
+            });
+            const data = await res.json();
+            
+            if(res.ok) {
+                document.getElementById('messageInput').value = '';
+                cancelReply();
+                loadMessages();
+            } else {
+                alert(data.error || "发送失败");
+            }
+        } catch(e) {
+            alert("通信中断");
+        }
+        btn.innerText = "发送信号";
+        btn.disabled = false;
+    }
+
+    async function deleteMsg(id) {
+        if(!confirm("确定要拦截这条信号吗？")) return;
+        const res = await fetch('/api/messages/' + id, { method: 'DELETE' });
+        if(res.ok) {
+            loadMessages();
+        } else {
+            alert("权限不足");
+        }
+    }
+
+    // --- 用户系统逻辑 ---
+
+    async function sendCode() {
+        const email = document.getElementById('regEmail').value;
+        if(!email) return alert("请填写邮箱");
+        
+        const btn = document.getElementById('codeBtn');
+        btn.disabled = true;
+        let countdown = 60;
+        const timer = setInterval(() => {
+            btn.innerText = `${countdown}s`;
+            countdown--;
+            if(countdown < 0) {
+                clearInterval(timer);
+                btn.innerText = "获取验证码";
+                btn.disabled = false;
+            }
+        }, 1000);
+
+        const res = await fetch('/api/send-code', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email})
+        });
+        const d = await res.json();
+        if(!res.ok) alert(d.error);
+        else alert(d.message);
+    }
+
+    async function doRegister() {
+        const payload = {
+            email: document.getElementById('regEmail').value,
+            code: document.getElementById('regCode').value,
+            password: document.getElementById('regPwd').value,
+            nickname: document.getElementById('regName').value,
+            qq: document.getElementById('regQQ').value
+        };
+        const res = await fetch('/api/register', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const d = await res.json();
+        if(res.ok) {
+            alert(d.message);
+            closeModal('registerModal');
+        } else {
+            alert(d.error);
+        }
+    }
+
+    async function doLogin() {
+        const payload = {
+            email: document.getElementById('loginEmail').value,
+            password: document.getElementById('loginPwd').value
+        };
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const d = await res.json();
+        if(res.ok) {
+            currentUser = d.user;
+            updateUserUI();
+            closeModal('loginModal');
+            loadMessages(); // 刷新显示删除按钮
+        } else {
+            alert(d.error);
+        }
+    }
+
+    async function doLogout() {
+        await fetch('/api/logout', {method: 'POST'});
+        currentUser = null;
+        updateUserUI();
+        loadMessages();
+    }
+
+    async function updateProfile(action) {
+        const payload = { action: action };
+        if(action === 'bind_qq') payload.qq = document.getElementById('profileQQ').value;
+        if(action === 'change_pwd') payload.password = document.getElementById('profilePwd').value;
+
+        const res = await fetch('/api/user/profile', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const d = await res.json();
+        alert(d.message || d.error);
+    }
+
+    // --- 辅助 ---
+
+    function checkLogin() {
+        // 页面加载时无法直接判断session，靠用户尝试操作或后端渲染
+        // 这里我们简单处理：如果用户发请求返回401，则未登录
+        // 更好的方式是后端在渲染模板时把user info 注入到 JS 变量，但我们是API分离模式
+        // 我们做一个 check 接口或者直接尝试 login (这里简化，默认未登录状态，等用户点登录)
+        // 其实可以在 index.py 的 index 路由里把用户信息传进来，但为了保持 HTML 静态纯净，我们不依赖模板引擎变量
+    }
+
+    function updateUserUI() {
+        const div = document.getElementById('user-status');
+        if(currentUser) {
+            div.innerHTML = `
+                <div style="text-align:center; margin-bottom:10px;">
+                    <img src="${currentUser.avatar_url || ''}" style="width:60px; height:60px; border-radius:50%; border:2px solid var(--neon-blue)">
+                    <div style="font-weight:bold; color:var(--neon-blue)">${currentUser.nickname}</div>
+                    <div style="font-size:0.8em; color:#666">${currentUser.role}</div>
+                </div>
+                <button class="btn" style="width:100%" onclick="openModal('profileModal')">档案设置</button>
+                <button class="btn btn-danger" style="width:100%; margin-top:5px;" onclick="doLogout()">断开连接</button>
+            `;
+        } else {
+            div.innerHTML = `
+                <p>状态: <span style="color: #888">未连接</span></p>
+                <button class="btn" style="width:100%; margin-top:10px;" onclick="openModal('loginModal')">接入系统 (Login)</button>
+                <button class="btn" style="width:100%; margin-top:10px;" onclick="openModal('registerModal')">注册 ID</button>
+            `;
+        }
+    }
+
+    function setReply(id, name) {
+        replyToId = id;
+        document.getElementById('reply-indicator').style.display = 'block';
+        document.getElementById('reply-target-name').innerText = name;
+        document.querySelector('.input-area textarea').focus();
+    }
+
+    function cancelReply() {
+        replyToId = null;
+        document.getElementById('reply-indicator').style.display = 'none';
+    }
+
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+    function escapeHtml(text) {
+        if(!text) return '';
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+</script>
+</body>
+</html>
